@@ -14,6 +14,9 @@
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1"
   },
+  "engines": {
+    "node": "20.x"
+  },
   "browserslist": {
     "production": [
       ">0.2%",
