@@ -4,7 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import session from "express-session";
 import ngrok from "ngrok";
-import { getRedirectUri, setBaseUrl } from "./utils/oauth.js";
+import { getRedirectUri, getBaseUrl, setBaseUrl } from "./utils/oauth.js";
 import oauthController from "./controllers/oauthController.js";
 import cardController from "./controllers/cardController.js";
 import {
@@ -54,25 +54,29 @@ const releaseConnections = (server) => {
   try {
     const server = app.listen(PORT, () => {
       console.log(`Listening on port: ${PORT}`);
-      return new Promise((resolve) => setTimeout(resolve, 100))
-        .then(() =>
-          ngrok.connect({
-            addr: PORT,
-            authtoken: NGROK_AUTHTOKEN,
+
+      // Only use ngrok if running locally
+      if (!getBaseUrl()) {
+        return new Promise((resolve) => setTimeout(resolve, 100))
+          .then(() =>
+            ngrok.connect({
+              addr: PORT,
+              authtoken: NGROK_AUTHTOKEN,
+            })
+          )
+          .then((url) => {
+            console.log(`Use ${url} to connect to this application.`);
+            setBaseUrl(url);
+            console.log(
+              `Update your app to use ${getRedirectUri()} as Redirect URL.`
+            );
+            console.log(`Update your app's CRM data fetch url`);
           })
-        )
-        .then((url) => {
-          console.log(`Use ${url} to connect to this application.`);
-          setBaseUrl(url);
-          console.log(
-            `Update your app to use ${getRedirectUri()} as Redirect URL.`
-          );
-          console.log(`Update your app's CRM data fetch url`);
-        })
-        .catch(async (e) => {
-          console.log("Error during app start. ", e);
-          return releaseConnections(server);
-        });
+          .catch(async (e) => {
+            console.log("Error during app start. ", e);
+            return releaseConnections(server);
+          });
+      }
     });
 
     process.on("SIGTERM", () => releaseConnections(server));

@@ -12,6 +12,8 @@ const refreshTokenStore = {};
 const accessTokenCache = new NodeCache({ deleteOnExpire: true });
 let APP_BASE_URL = BASE_URL;
 
+export const getBaseUrl = () => APP_BASE_URL;
+
 export const setBaseUrl = (url) => {
   APP_BASE_URL = url;
 };
