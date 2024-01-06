@@ -1,16 +1,17 @@
 import axios from "axios";
 import { getAccessToken } from "./oauth.js";
 
-const getHeaders = async (sessionID) => {
-  const accessToken = await getAccessToken(sessionID);
+const getHeaders = async () => {
+  // TODO: fix this eventually
+  const accessToken = await getAccessToken(1);
   return {
     Authorization: `Bearer ${accessToken}`,
     "Content-Type": "application/json",
   };
 };
 
-const getRequest = async (sessionID, url) => {
-  const headers = await getHeaders(sessionID);
+const getRequest = async (url) => {
+  const headers = await getHeaders();
   return axios({ method: "get", headers, url });
 };
 
