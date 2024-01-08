@@ -69,8 +69,3 @@ export const verifyTokenExpiration = async (userId) => {
     new Date(tokenData.updated_at).getTime() + tokenData.expires_in * 1000
   );
 };
-
-export const verifyAuthorization = async () => {
-  const tokenData = await mysqlDB.getHubspotTokenData();
-  return !!tokenData && Object.keys(tokenData).length();
-};

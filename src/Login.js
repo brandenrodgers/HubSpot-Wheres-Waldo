@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
+import Flex from "./UIComponents/Flex";
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState("");
@@ -32,33 +33,40 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div>
-      Username:
-      <input
-        type="input"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      Password:
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <input
-        type="button"
-        value="sign up"
-        disabled={!username || !password}
-        onClick={signUpRequest}
-      />
-      <input
-        type="button"
-        value="login"
-        disabled={!username || !password}
-        onClick={loginRequest}
-      />
+    <Flex direction="column" align="center" gap="10px">
+      <div>
+        <span className="p-right">Username:</span>
+        <input
+          type="input"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+      </div>
+      <div>
+        <span className="p-right">Password:</span>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </div>
+      <div>
+        <input
+          className="m-right"
+          type="button"
+          value="sign up"
+          disabled={!username || !password}
+          onClick={signUpRequest}
+        />
+        <input
+          type="button"
+          value="login"
+          disabled={!username || !password}
+          onClick={loginRequest}
+        />
+      </div>
       <div>{status}</div>
-    </div>
+    </Flex>
   );
 };
 

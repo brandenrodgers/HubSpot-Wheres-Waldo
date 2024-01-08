@@ -1,68 +1,28 @@
 import "./styles.css";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Header from "./Header";
-import Contacts from "./Contacts";
 import Login from "./Login";
+import Account from "./Account";
+import Flex from "./UIComponents/Flex";
+import Leaderboard from "./Leaderboard";
 
 const App = () => {
-  const [accessToken, setAccessToken] = useState(null);
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchAccessToken();
-    }
-  }, [user]);
-
-  const fetchAccessToken = async () => {
-    setIsLoading(true);
-    try {
-      const { data } = await axios.get(`/oauth/install-status`, {
-        params: {
-          userId: user.id,
-        },
-      });
-      setAccessToken(data);
-    } catch (e) {
-      console.log(e);
-    }
-    setIsLoading(false);
-  };
-
-  const renderContent = () => {
+  const renderAccount = () => {
     if (!user) {
       return <Login onLogin={(user) => setUser(user)} />;
     }
-    if (isLoading) {
-      return <div>Loading Access Token For Session...</div>;
-    }
-    if (accessToken) {
-      return (
-        <div>
-          <div>You have installed the HubSpot app!</div>{" "}
-          <div>Access Token:</div>
-          <div style={{ fontSize: "7px" }}>{accessToken}</div>
-          <Contacts />
-        </div>
-      );
-    }
-    return (
-      <div>
-        <div>
-          You need to install the HubSpot App{" "}
-          <a href={`oauth/install?userId=${user.id}`}>(Install)</a>
-        </div>
-        <input type="button" onClick={fetchAccessToken} value="Retry fetch" />
-      </div>
-    );
+    return <Account updateUser={setUser} user={user} />;
   };
 
   return (
     <div className="app">
       <Header />
-      <div className="content">{renderContent()}</div>
+      <Flex className="content" justify="center">
+        {renderAccount()}
+      </Flex>
+      <Leaderboard />
     </div>
   );
 };

@@ -13,6 +13,7 @@ const HUBSPOT_TOKENS_TABLE_INIT = `create table if not exists hubspot_tokens  (
   user_id INT NOT NULL,
   refresh_token  VARCHAR(255)   default null,
   access_token   VARCHAR(255)   default null,
+  hub_id         int            default null,
   expires_in     bigint         default null,
   created_at     datetime       default CURRENT_TIMESTAMP,
   updated_at     datetime       default CURRENT_TIMESTAMP,
@@ -22,7 +23,9 @@ const HUBSPOT_TOKENS_TABLE_INIT = `create table if not exists hubspot_tokens  (
 const USERS_TABLE_INIT = `create table if not exists users  (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) default null
+  password VARCHAR(255) default null,
+  score int default 0,
+  public boolean default false
 );`;
 
 const URLS_TABLE_INIT = `create table if not exists urls  (
@@ -77,16 +80,45 @@ export default {
     const result = await runQuery(getUser);
     return result[0];
   },
+  getUserByPortal: async (hub_id) => {
+    const getTokenData = `select * from hubspot_tokens where hub_id = ${hub_id}`;
+    const result = await runQuery(getTokenData);
+    const tokenData = result[0];
+
+    const getUser = `select * from users where id = ${tokenData.user_id}`;
+    const result2 = await runQuery(getUser);
+    return result2[0];
+  },
+  updateUserPublic: async (user_id, isPublic) => {
+    const updateUser = `update users set public = '${isPublic}' where id = ${user_id}`;
+    const getUser = `select * from users where id = ${user_id}`;
+
+    await runQuery(updateUser);
+    const result = await runQuery(getUser);
+    return result[0];
+  },
+  updateUserScore: async (user_id, score) => {
+    const updateUser = `update users set score = ${score} where id = ${user_id}`;
+    const getUser = `select * from users where id = ${user_id}`;
+
+    await runQuery(updateUser);
+    const result = await runQuery(getUser);
+    return result[0];
+  },
+  getPublicUsers: async () => {
+    const getPublicUsers = `select * from users where public = true`;
+    return runQuery(getPublicUsers);
+  },
   getHubspotTokenData: async (user_id) => {
     const getHubspotTokenData = `select * from hubspot_tokens where user_id = "${user_id}"`;
     const result = await runQuery(getHubspotTokenData);
     return result[0];
   },
   saveHubspotTokenData: (
-    { refresh_token, access_token, expires_in },
+    { refresh_token, access_token, expires_in, hub_id },
     user_id
   ) => {
-    const saveHubspotTokens = `insert into hubspot_tokens (user_id, refresh_token, access_token, expires_in) values ("${user_id}", "${refresh_token}", "${access_token}", ${expires_in})`;
+    const saveHubspotTokens = `insert into hubspot_tokens (user_id, refresh_token, access_token, hub_id, expires_in) values ("${user_id}", "${refresh_token}", "${access_token}", ${hub_id}, ${expires_in})`;
     return runQuery(saveHubspotTokens);
   },
   updateHubspotTokenData: async ({

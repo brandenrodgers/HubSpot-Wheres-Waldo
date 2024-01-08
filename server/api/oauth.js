@@ -18,6 +18,19 @@ export const fetchAccessAndRefreshTokens = async (exchangeProof) => {
     console.error(
       `Error fetching ${exchangeProof.grant_type} for access token`
     );
-    throw new Error(e);
+    throw e;
+  }
+};
+
+export const fetchAccessTokenMetadata = async (token) => {
+  try {
+    const { data: tokenMetadata } = await axios.get(
+      `${HS_API_URL}/oauth/v1/access-tokens/${token}`
+    );
+
+    return tokenMetadata;
+  } catch (e) {
+    console.error(`Error fetching access token metadata`);
+    throw e;
   }
 };

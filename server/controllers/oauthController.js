@@ -1,23 +1,35 @@
 import express from "express";
 import mysqlDB from "../utils/mysqlDB.js";
-import { fetchAccessAndRefreshTokens } from "../api/oauth.js";
+import { getUserForSession } from "../utils/http.js";
 import {
   getAuthUrl,
   getAuthCodeProof,
   getAccessToken,
 } from "../utils/oauth.js";
+import {
+  fetchAccessAndRefreshTokens,
+  fetchAccessTokenMetadata,
+} from "../api/oauth.js";
+import { ensureWaldoProperty, hideWaldo } from "../utils/waldo.js";
 
 const router = new express.Router();
 
 // Redirect the user from the installation page to the authorization URL
 router.get("/install", async (req, res) => {
-  const authUrl = await getAuthUrl(req.query.userId);
+  let userId;
+  try {
+    userId = getUserForSession(req);
+  } catch (e) {
+    res.sendStatus(500);
+  }
+  const authUrl = await getAuthUrl(userId);
   res.redirect(authUrl);
 });
 
 router.get("/install-status", async (req, res) => {
   try {
-    const accessToken = await getAccessToken(req.query.userId);
+    const userId = getUserForSession(req);
+    const accessToken = await getAccessToken(userId);
     res.send(accessToken);
   } catch (e) {
     console.log("no access token found");
@@ -36,8 +48,25 @@ router.get("/callback", async (req, res) => {
       return res.redirect(`/error?msg=${tokenData.message}`);
     }
 
-    // State will be the user id of the logged-in user
-    await mysqlDB.saveHubspotTokenData(tokenData, req.query.state);
+    // Get the hub_id associated with the access token
+    const tokenMetadata = await fetchAccessTokenMetadata(
+      tokenData.access_token
+    );
+
+    console.log(tokenMetadata);
+
+    // "State" will be the user id of the logged-in user
+    await mysqlDB.saveHubspotTokenData(
+      { hub_id: tokenMetadata.hub_id, ...tokenData },
+      req.query.state
+    );
+
+    // Ensure custom waldo property exists
+    await ensureWaldoProperty(req);
+
+    // Hide waldo on a random contact
+    await hideWaldo(req);
+
     res.redirect(`/`);
   }
 });

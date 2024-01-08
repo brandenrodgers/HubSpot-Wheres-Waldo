@@ -1,5 +1,6 @@
 import "./config.js";
 import express from "express";
+import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
 import ngrok from "ngrok";
@@ -25,6 +26,14 @@ if (!HS_CLIENT_ID || !HS_CLIENT_SECRET || !SCOPES) {
 const app = express();
 
 // add middleware
+app.use(
+  session({
+    secret: Math.random().toString(36).substring(2),
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
 app.use(express.static("public"));
 
 app.use("/oauth", oauthController);
