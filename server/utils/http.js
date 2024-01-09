@@ -16,8 +16,8 @@ export const getUserForSession = ({ sessionID }) => {
   return userId;
 };
 
-const getHeaders = async (req) => {
-  const userId = getUserForSession(req);
+const getHeaders = async (auth = {}) => {
+  const userId = auth.userId || getUserForSession(auth);
   const accessToken = await getAccessToken(userId);
   return {
     Authorization: `Bearer ${accessToken}`,
@@ -25,18 +25,18 @@ const getHeaders = async (req) => {
   };
 };
 
-const getRequest = async (req, url) => {
-  const headers = await getHeaders(req);
+const getRequest = async (auth, url) => {
+  const headers = await getHeaders(auth);
   return axios({ method: "get", headers, url });
 };
 
-const postRequest = async (req, url, data) => {
-  const headers = await getHeaders(req);
+const postRequest = async (auth, url, data) => {
+  const headers = await getHeaders(auth);
   return axios({ method: "post", headers, url, data });
 };
 
-const patchRequest = async (req, url, data) => {
-  const headers = await getHeaders(req);
+const patchRequest = async (auth, url, data) => {
+  const headers = await getHeaders(auth);
   return axios({ method: "patch", headers, url, data });
 };
 

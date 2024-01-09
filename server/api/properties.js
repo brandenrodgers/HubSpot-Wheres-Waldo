@@ -1,10 +1,10 @@
 import http from "../utils/http.js";
 import { HS_API_URL } from "../constants.js";
 
-export const getPropertyForObject = async (req, objectType, property) => {
+export const getPropertyForObject = async (auth, objectType, property) => {
   try {
     const { data } = await http.get(
-      req,
+      auth,
       `${HS_API_URL}/properties/v1/${objectType}/properties/named/${property}`
     );
     return data;
@@ -15,13 +15,13 @@ export const getPropertyForObject = async (req, objectType, property) => {
 };
 
 export const createPropertyForObject = async (
-  req,
+  auth,
   objectType,
   propertyOptions
 ) => {
   try {
     const { data } = await http.post(
-      req,
+      auth,
       `${HS_API_URL}/properties/v1/${objectType}/properties`,
       propertyOptions
     );
@@ -33,14 +33,14 @@ export const createPropertyForObject = async (
 };
 
 export const updatePropertyForObject = async (
-  req,
+  auth,
   objectType,
   objectId,
   newProps
 ) => {
   try {
     const { data } = await http.patch(
-      req,
+      auth,
       `${HS_API_URL}/crm/v3/objects/${objectType}/${objectId}`,
       { properties: newProps }
     );

@@ -1,5 +1,8 @@
 import express from "express";
+import crypto from "crypto";
 import mysqlDB from "../utils/mysqlDB.js";
+import { moveWaldo } from "../utils/waldo.js";
+import { HS_CLIENT_SECRET } from "../constants.js";
 
 const router = new express.Router();
 
@@ -46,14 +49,22 @@ router.post("/found-waldo", async (req, res) => {
   const { portalId } = req.query;
   const hubspotSignature = req.headers["x-hubspot-signature"];
 
-  const signatureValidate = HS_CLIENT_SECRET + req.method + req.url;
-  console.log({ hubspotSignature, signatureValidate });
+  const fullUrl = req.protocol + "://" + req.get("host") + req.originalUrl;
+  const validateKey = HS_CLIENT_SECRET + req.method + fullUrl;
+  const hash = crypto.createHash("sha256").update(validateKey).digest("hex");
+  console.log({ hubspotSignature, validateKey, hash });
+
+  // TODO Actually validate request
 
   const user = await mysqlDB.getUserByPortal(portalId);
 
   await mysqlDB.updateUserScore(user.id, user.score + 1);
 
-  // TODO: move waldo somehow
+  try {
+    await moveWaldo({ userId: user.id });
+  } catch (e) {
+    return res.sendStatus(500);
+  }
 
   res.sendStatus(200);
 });

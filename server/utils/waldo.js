@@ -1,32 +1,18 @@
-import { getContacts } from "../api/contacts.js";
+import { getContacts, getContactWithWaldo } from "../api/contacts.js";
 import {
   createPropertyForObject,
   getPropertyForObject,
   updatePropertyForObject,
 } from "../api/properties.js";
+import { IS_WALDO_HIDING_HERE_OPTIONS } from "../constants.js";
 
 const getRandomNum = (min, max) =>
   Math.floor(Math.random() * (max - min + 1) + min);
 
-const IS_WALDO_HIDING_HERE_OPTIONS = {
-  name: "is_waldo_hiding_here",
-  label: "Is Waldo Hiding Here",
-  groupName: "contactinformation",
-  type: "bool",
-  options: [
-    { label: "Waldo is here", description: "Waldo is here", value: true },
-    {
-      label: "Waldo is not here",
-      description: "Waldo is not here",
-      value: false,
-    },
-  ],
-};
-
-export const ensureWaldoProperty = async (req) => {
+export const ensureWaldoProperty = async (auth) => {
   try {
     const property = await getPropertyForObject(
-      req,
+      auth,
       "contacts",
       IS_WALDO_HIDING_HERE_OPTIONS.name
     );
@@ -40,7 +26,7 @@ export const ensureWaldoProperty = async (req) => {
 
   try {
     await createPropertyForObject(
-      req,
+      auth,
       "contacts",
       IS_WALDO_HIDING_HERE_OPTIONS
     );
@@ -50,17 +36,32 @@ export const ensureWaldoProperty = async (req) => {
   }
 };
 
-export const hideWaldo = async (req) => {
+export const hideWaldo = async (auth) => {
   try {
-    const contacts = await getContacts(req);
+    const contacts = await getContacts(auth);
     const randomIndex = getRandomNum(0, contacts.length - 1);
     const contact = contacts[randomIndex];
 
-    await updatePropertyForObject(req, "contacts", contact.vid, {
+    await updatePropertyForObject(auth, "contacts", contact.vid, {
       [IS_WALDO_HIDING_HERE_OPTIONS.name]: true,
     });
   } catch (e) {
     console.error("Failed to hide waldo", e);
     throw e;
   }
+};
+
+export const moveWaldo = async (auth) => {
+  try {
+    const contact = await getContactWithWaldo(auth);
+
+    await updatePropertyForObject(auth, "contacts", contact.id, {
+      [IS_WALDO_HIDING_HERE_OPTIONS.name]: false,
+    });
+  } catch (e) {
+    console.error("Failed to move waldo", e);
+    throw e;
+  }
+
+  await hideWaldo(auth);
 };

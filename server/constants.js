@@ -13,3 +13,18 @@ export const HS_CLIENT_SECRET = process.env.HS_CLIENT_SECRET;
 export const SCOPES = process.env.SCOPES
   ? process.env.SCOPES.split(/ |, ?|%20/).join(" ")
   : null;
+
+export const IS_WALDO_HIDING_HERE_OPTIONS = {
+  name: "is_waldo_hiding_here",
+  label: "Is Waldo Hiding Here",
+  groupName: "contactinformation",
+  type: "bool",
+  options: [
+    { label: "Waldo is here", description: "Waldo is here", value: true },
+    {
+      label: "Waldo is not here",
+      description: "Waldo is not here",
+      value: false,
+    },
+  ],
+};
