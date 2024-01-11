@@ -13,6 +13,7 @@ export const fetchAccessAndRefreshTokens = async (exchangeProof) => {
       }
     );
 
+    console.log(tokenData);
     return tokenData;
   } catch (e) {
     console.error(

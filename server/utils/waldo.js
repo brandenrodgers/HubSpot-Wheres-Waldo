@@ -9,10 +9,10 @@ import { IS_WALDO_HIDING_HERE_OPTIONS } from "../constants.js";
 const getRandomNum = (min, max) =>
   Math.floor(Math.random() * (max - min + 1) + min);
 
-export const ensureWaldoProperty = async (auth) => {
+export const ensureWaldoProperty = async (portalId) => {
   try {
     const property = await getPropertyForObject(
-      auth,
+      portalId,
       "contacts",
       IS_WALDO_HIDING_HERE_OPTIONS.name
     );
@@ -26,7 +26,7 @@ export const ensureWaldoProperty = async (auth) => {
 
   try {
     await createPropertyForObject(
-      auth,
+      portalId,
       "contacts",
       IS_WALDO_HIDING_HERE_OPTIONS
     );
@@ -36,13 +36,13 @@ export const ensureWaldoProperty = async (auth) => {
   }
 };
 
-export const hideWaldo = async (auth) => {
+export const hideWaldo = async (portalId) => {
   try {
-    const contacts = await getContacts(auth);
+    const contacts = await getContacts(portalId);
     const randomIndex = getRandomNum(0, contacts.length - 1);
     const contact = contacts[randomIndex];
 
-    await updatePropertyForObject(auth, "contacts", contact.vid, {
+    await updatePropertyForObject(portalId, "contacts", contact.vid, {
       [IS_WALDO_HIDING_HERE_OPTIONS.name]: true,
     });
   } catch (e) {
@@ -51,11 +51,11 @@ export const hideWaldo = async (auth) => {
   }
 };
 
-export const moveWaldo = async (auth) => {
+export const moveWaldo = async (portalId) => {
   try {
-    const contact = await getContactWithWaldo(auth);
+    const contact = await getContactWithWaldo(portalId);
 
-    await updatePropertyForObject(auth, "contacts", contact.id, {
+    await updatePropertyForObject(portalId, "contacts", contact.id, {
       [IS_WALDO_HIDING_HERE_OPTIONS.name]: false,
     });
   } catch (e) {
@@ -63,5 +63,5 @@ export const moveWaldo = async (auth) => {
     throw e;
   }
 
-  await hideWaldo(auth);
+  await hideWaldo(portalId);
 };

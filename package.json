@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "cd server && npm install",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider && react-scripts --openssl-legacy-provider build",
     "start": "cd server && npm run start",
     "dev": "npm run build && (cd server && npm run start)"
   },

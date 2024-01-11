@@ -1,10 +1,10 @@
 import http from "../utils/http.js";
 import { HS_API_URL } from "../constants.js";
 
-export const getPropertyForObject = async (auth, objectType, property) => {
+export const getPropertyForObject = async (portalId, objectType, property) => {
   try {
     const { data } = await http.get(
-      auth,
+      portalId,
       `${HS_API_URL}/properties/v1/${objectType}/properties/named/${property}`
     );
     return data;
@@ -15,13 +15,13 @@ export const getPropertyForObject = async (auth, objectType, property) => {
 };
 
 export const createPropertyForObject = async (
-  auth,
+  portalId,
   objectType,
   propertyOptions
 ) => {
   try {
     const { data } = await http.post(
-      auth,
+      portalId,
       `${HS_API_URL}/properties/v1/${objectType}/properties`,
       propertyOptions
     );
@@ -33,14 +33,14 @@ export const createPropertyForObject = async (
 };
 
 export const updatePropertyForObject = async (
-  auth,
+  portalId,
   objectType,
   objectId,
   newProps
 ) => {
   try {
     const { data } = await http.patch(
-      auth,
+      portalId,
       `${HS_API_URL}/crm/v3/objects/${objectType}/${objectId}`,
       { properties: newProps }
     );

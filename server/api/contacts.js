@@ -2,10 +2,10 @@ import http from "../utils/http.js";
 import { HS_API_URL, IS_WALDO_HIDING_HERE_OPTIONS } from "../constants.js";
 
 // Contacts
-export const getContacts = async (auth) => {
+export const getContacts = async (portalId) => {
   try {
     const { data } = await http.get(
-      auth,
+      portalId,
       `${HS_API_URL}/contacts/v1/lists/all/contacts/all`
     );
     return data.contacts;
@@ -15,10 +15,10 @@ export const getContacts = async (auth) => {
   }
 };
 
-export const getContactWithWaldo = async (auth) => {
+export const getContactWithWaldo = async (portalId) => {
   try {
     const { data } = await http.post(
-      auth,
+      portalId,
       `${HS_API_URL}/crm/v3/objects/contacts/search`,
       {
         filterGroups: [

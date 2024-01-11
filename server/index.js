@@ -1,10 +1,11 @@
 import "./config.js";
 import express from "express";
 import session from "express-session";
+import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import ngrok from "ngrok";
-import mysqlDB from "./utils/mysqlDB.js";
+import pgDB from "./utils/postgresDB.js";
 import oauthController from "./controllers/oauthController.js";
 import cardController from "./controllers/cardController.js";
 import apiController from "./controllers/apiController.js";
@@ -34,6 +35,8 @@ app.use(
   })
 );
 
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(express.static("public"));
 
 app.use("/oauth", oauthController);
@@ -46,7 +49,7 @@ app.use(express.static(path.join(__dirname, "..", "build")));
 app.use(express.static("public"));
 
 const releaseConnections = (server) => {
-  mysqlDB.close();
+  pgDB.close();
   return server.close(() => {
     console.log("Process terminated");
     process.exit();
@@ -55,14 +58,14 @@ const releaseConnections = (server) => {
 
 (async () => {
   try {
-    await mysqlDB.init();
+    await pgDB.init();
 
     const server = app.listen(PORT, () => {
       console.log(`Listening on port: ${PORT}`);
 
       // Only use ngrok if running locally
       if (BASE_URL) {
-        mysqlDB.saveUrl(BASE_URL);
+        pgDB.saveUrl(BASE_URL);
       } else {
         return new Promise((resolve) => setTimeout(resolve, 100))
           .then(() =>
@@ -73,7 +76,7 @@ const releaseConnections = (server) => {
           )
           .then(async (url) => {
             console.log(`Use ${url} to connect to this application.`);
-            mysqlDB.saveUrl(url);
+            pgDB.saveUrl(url);
           })
           .catch(async (e) => {
             console.log("Error during app start. ", e);

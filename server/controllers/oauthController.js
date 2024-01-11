@@ -1,11 +1,6 @@
 import express from "express";
-import mysqlDB from "../utils/mysqlDB.js";
-import { getUserForSession } from "../utils/http.js";
-import {
-  getAuthUrl,
-  getAuthCodeProof,
-  getAccessToken,
-} from "../utils/oauth.js";
+import pgDB from "../utils/postgresDB.js";
+import { getAuthUrl, getAuthCodeProof } from "../utils/oauth.js";
 import {
   fetchAccessAndRefreshTokens,
   fetchAccessTokenMetadata,
@@ -16,25 +11,8 @@ const router = new express.Router();
 
 // Redirect the user from the installation page to the authorization URL
 router.get("/install", async (req, res) => {
-  let userId;
-  try {
-    userId = getUserForSession(req);
-  } catch (e) {
-    res.sendStatus(500);
-  }
-  const authUrl = await getAuthUrl(userId);
+  const authUrl = await getAuthUrl();
   res.redirect(authUrl);
-});
-
-router.get("/install-status", async (req, res) => {
-  try {
-    const userId = getUserForSession(req);
-    const accessToken = await getAccessToken(userId);
-    res.send(accessToken);
-  } catch (e) {
-    console.log("no access token found");
-    res.sendStatus(400);
-  }
 });
 
 router.get("/callback", async (req, res) => {
@@ -53,19 +31,15 @@ router.get("/callback", async (req, res) => {
       tokenData.access_token
     );
 
-    console.log(tokenMetadata);
+    const portalId = tokenMetadata.hub_id;
 
-    // "State" will be the user id of the logged-in user
-    await mysqlDB.saveHubspotTokenData(
-      { hub_id: tokenMetadata.hub_id, ...tokenData },
-      req.query.state
-    );
+    await pgDB.saveHubspotTokenData(portalId, tokenData);
 
     // Ensure custom waldo property exists
-    await ensureWaldoProperty(req);
+    await ensureWaldoProperty(portalId);
 
     // Hide waldo on a random contact
-    await hideWaldo(req);
+    await hideWaldo(portalId);
 
     res.redirect(`/`);
   }

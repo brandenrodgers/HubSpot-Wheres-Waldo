@@ -1,4 +1,4 @@
-import mysqlDB from "./mysqlDB.js";
+import pgDB from "./postgresDB.js";
 import { fetchAccessAndRefreshTokens } from "../api/oauth.js";
 import {
   HS_APP_URL,
@@ -8,18 +8,17 @@ import {
 } from "../constants.js";
 
 const getRedirectUri = async () => {
-  const baseUrl = await mysqlDB.getUrl();
+  const baseUrl = await pgDB.getUrl();
   return `${baseUrl}/oauth/callback`;
 };
 
-export const getAuthUrl = async (state) => {
+export const getAuthUrl = async () => {
   const redirectUri = await getRedirectUri();
   return (
     `${HS_APP_URL}/oauth/authorize` +
     `?client_id=${encodeURIComponent(HS_CLIENT_ID)}` + // app's client ID
     `&redirect_uri=${redirectUri}` + // where to send the user after the consent page
-    `&scope=${encodeURIComponent(SCOPES)}` + // scopes being requested by the app
-    `${state ? `&state=${state}` : ""}` // state that will be passed back to the redirect url
+    `&scope=${encodeURIComponent(SCOPES)}` // scopes being requested by the app
   );
 };
 
@@ -34,9 +33,9 @@ export const getAuthCodeProof = async (authCode) => {
   };
 };
 
-const refreshAccessToken = async (userId) => {
+const refreshAccessToken = async (portalId) => {
   const redirectUri = await getRedirectUri();
-  const staleTokenData = await mysqlDB.getHubspotTokenData(userId);
+  const staleTokenData = await pgDB.getHubspotTokenDataByPortalId(portalId);
 
   const refreshTokenProof = {
     grant_type: "refresh_token",
@@ -47,23 +46,23 @@ const refreshAccessToken = async (userId) => {
   };
 
   const tokenData = await fetchAccessAndRefreshTokens(refreshTokenProof);
-  await mysqlDB.updateHubspotTokenData(tokenData);
+  await pgDB.updateHubspotTokenData(staleTokenData.refresh_token, tokenData);
 };
 
-export const getAccessToken = async (userId) => {
-  const tokenExpired = await verifyTokenExpiration(userId);
+export const getAccessToken = async (portalId) => {
+  const tokenExpired = await verifyTokenExpiration(portalId);
 
   if (tokenExpired) {
     console.log("Refreshing expired access token");
-    await refreshAccessToken(userId);
+    await refreshAccessToken(portalId);
   }
 
-  const tokenData = await mysqlDB.getHubspotTokenData(userId);
+  const tokenData = await pgDB.getHubspotTokenDataByPortalId(portalId);
   return tokenData.access_token;
 };
 
-export const verifyTokenExpiration = async (userId) => {
-  const tokenData = await mysqlDB.getHubspotTokenData(userId);
+const verifyTokenExpiration = async (portalId) => {
+  const tokenData = await pgDB.getHubspotTokenDataByPortalId(portalId);
   return (
     Date.now() >=
     new Date(tokenData.updated_at).getTime() + tokenData.expires_in * 1000
