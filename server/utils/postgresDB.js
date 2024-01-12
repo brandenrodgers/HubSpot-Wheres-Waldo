@@ -133,7 +133,7 @@ const pgDB = {
     };
     const getHubspotTokenDataQuery = {
       text: "SELECT * from hubspot_tokens WHERE refresh_token = $1",
-      value: [refresh_token],
+      values: [refresh_token],
     };
 
     await runQuery(updateHubspotTokenDataQuery);

@@ -1,7 +1,6 @@
 import "./config.js";
 import express from "express";
 import session from "express-session";
-import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import ngrok from "ngrok";
@@ -35,8 +34,8 @@ app.use(
   })
 );
 
-app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(express.urlencoded());
+app.use(express.json());
 app.use(express.static("public"));
 
 app.use("/oauth", oauthController);
@@ -65,6 +64,7 @@ const releaseConnections = (server) => {
 
       // Only use ngrok if running locally
       if (BASE_URL) {
+        console.log(`Use ${BASE_URL} to connect to this application.`);
         pgDB.saveUrl(BASE_URL);
       } else {
         return new Promise((resolve) => setTimeout(resolve, 100))
