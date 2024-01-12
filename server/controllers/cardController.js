@@ -28,7 +28,7 @@ router.get("/waldo", async (req, res) => {
     });
   }
 
-  const user = pgDB.getUserById(buildUniqueUserId(portalId, userId));
+  const user = await pgDB.getUserById(buildUniqueUserId(portalId, userId));
 
   if (user) {
     actions.push({
