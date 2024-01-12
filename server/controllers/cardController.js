@@ -11,27 +11,30 @@ router.get("/waldo", async (req, res) => {
   const isWaldoHere = is_waldo_hiding_here === "true";
   const properties = [];
   const actions = [];
+  let primaryAction;
+  const secondaryActions = [];
+
   const baseUrl = await pgDB.getUrl();
 
   if (isWaldoHere) {
-    actions.push({
+    primaryAction = {
       type: "ACTION_HOOK",
       httpMethod: "GET",
       uri: `${baseUrl}/card/found-waldo`,
       label: "Mark Waldo as found",
-    });
+    };
   } else {
     properties.push({
-      label: "Clue",
+      label: "Hint",
       dataType: "STRING",
-      value: "He is somewhere else...",
+      value: "He is hiding somewhere else...",
     });
   }
 
   const user = await pgDB.getUserById(buildUniqueUserId(portalId, userId));
 
   if (user) {
-    actions.push({
+    secondaryActions.push({
       type: "ACTION_HOOK",
       httpMethod: "GET",
       uri: `${baseUrl}/card/show-on-leaderboard?value=${!user.show_on_leaderboard}`,
@@ -46,13 +49,16 @@ router.get("/waldo", async (req, res) => {
       {
         objectId: 123,
         title: "Where's Waldo",
+        link: baseUrl,
         waldo: isWaldoHere
-          ? "YOU FOUND HIM!"
-          : `He's not hiding with ${firstname}!`,
+          ? "Yes, you found him!"
+          : `No, he's not hiding with ${firstname}!`,
         properties,
         actions,
       },
     ],
+    primaryAction,
+    secondaryActions,
   });
 });
 
