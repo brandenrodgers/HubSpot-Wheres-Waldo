@@ -48,6 +48,10 @@ const pgDB = {
         password: PG_DB_PASSWORD,
         database: PG_DB_NAME,
         port: 5432,
+        ssl:
+          process.env.NODE_ENV === "production"
+            ? { sslmode: "require", rejectUnauthorized: false }
+            : false,
       });
 
       await client.connect();
