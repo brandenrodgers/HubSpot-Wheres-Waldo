@@ -48,7 +48,7 @@ const Leaderboard = () => {
     <Flex className="leaderboard" align="center" direction="column">
       <h1>Top Waldo Finders</h1>
       <span className="p-bottom-10" style={{ width: "70%" }}>
-        Join the Waldo finding leaderbord by installing the app and using the
+        Join the Waldo finding leaderboard by installing the app and using the
         dropdown action in the Where's Waldo CRM card!
       </span>
       {renderLeaders()}
