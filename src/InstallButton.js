@@ -8,7 +8,7 @@ const InstallButton = () => {
         className="install-button"
         type="button"
         onClick={() => (window.location.href = "oauth/install")}
-        value="Install In Your HubSpot Account"
+        value="Install In HubSpot"
       />
     </Flex>
   );
